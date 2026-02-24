@@ -1,0 +1,37 @@
+name: SET Scraper Automation
+
+on:
+  schedule:
+    # 02:00 น. เวลาไทย คือ 19:00 น. ของวันก่อนหน้าในเวลา UTC
+    - cron: '0 19 * * *'
+  workflow_dispatch: # ปุ่มกดรันเองเพื่อทดสอบ
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # สำคัญ: เพื่อให้บอทเซฟไฟล์ CSV กลับเข้า GitHub ได้
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          pip install pandas selenium webdriver-manager beautifulsoup4 lxml html5lib requests
+
+      - name: Run SET Scraper
+        run: python set_github.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          git add data_factsheet/*.csv
+          # ถ้าไม่มีข้อมูลใหม่ ไม่ต้อง Commit เพื่อป้องกัน Error
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update SET data: $(date)" && git push)
