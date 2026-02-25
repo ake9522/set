@@ -32,6 +32,6 @@ jobs:
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "actions@github.com"
-          git add data_factsheet/*.csv
+          git add *.csv data_factsheet/*.csv
           # ถ้าไม่มีข้อมูลใหม่ ไม่ต้อง Commit เพื่อป้องกัน Error
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update SET data: $(date)" && git push)
