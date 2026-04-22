@@ -9,6 +9,7 @@ import shutil
 import time
 import threading
 import queue
+import subprocess
 from io import StringIO
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, wait
@@ -70,25 +71,42 @@ XPATH_MAPPINGS = {
 # HELPER FUNCTIONS
 # ==========================================
 
+def kill_chrome_instances():
+    """สั่งฆ่า Process Chrome และ Driver ที่ค้างอยู่ในระบบ (ใช้กับ Linux/GitHub Actions)"""
+    try:
+        # สำหรับ Linux (GitHub Runner)
+        subprocess.run(["pkill", "-f", "chrome"], stderr=subprocess.DEVNULL)
+        subprocess.run(["pkill", "-f", "chromedriver"], stderr=subprocess.DEVNULL)
+    except:
+        pass
+
 def create_driver():
-    options = webdriver.ChromeOptions()
-    if HEADLESS_MODE:
-        options.add_argument("--headless") # สำคัญมากสำหรับการรันบน GitHub
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--blink-settings=imagesEnabled=false") # ไม่ต้องโหลดรูปภาพ ประหยัด Bandwidth/RAM
-    
-    # ใช้ ChromeDriverManager แทนการระบุ Path ในเครื่องตัวเอง
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    # ตั้งค่า Page Load Timeout ป้องกันค้างยาว
-    driver.set_page_load_timeout(60)
-    return driver
+    max_driver_retries = 3
+    for i in range(max_driver_retries):
+        try:
+            options = webdriver.ChromeOptions()
+            if HEADLESS_MODE:
+                options.add_argument("--headless=new")
+            
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--disable-software-rasterizer") # ลดภาระ CPU
+            options.add_argument("--blink-settings=imagesEnabled=false")
+            options.add_argument("--window-size=1920,1080")
+            options.add_argument('--ignore-certificate-errors')
+            
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            
+            # ตั้งเวลา Timeout ให้สั้นลงเพื่อไม่ให้ค้างนานเกินไป (ถ้า 30 วิยังไม่ตอบสนอง ให้ Error เพื่อเริ่มใหม่)
+            driver.set_page_load_timeout(30)
+            return driver
+        except Exception as e:
+            print(f"⚠️ Driver creation failed (Attempt {i+1}/{max_driver_retries}): {e}")
+            kill_chrome_instances() # ล้างของเก่าทิ้งก่อนลองใหม่
+            time.sleep(2)
+    raise Exception("🔥 Could not initialize Chrome Driver after several attempts")
 
 def setup_environment():
     """เตรียม Folder และไฟล์ตั้งต้น"""
@@ -177,48 +195,52 @@ def parse_page_content(html_content, page_url):
 
 def worker_thread(url_queue, result_list):
     """
-    Worker thread ที่มีการจัดการ Resource (RAM) และ Retry Logic
-    เพื่อป้องกันปัญหา Tab Crashed และ Timeout บน GitHub Actions
+    Worker thread เวอร์ชันเสถียรสูงสุด: 
+    - จำกัดจำนวน URL ต่อ Driver ต่ำลง (10-15)
+    - Hard Kill process ก่อนเริ่ม session ใหม่
+    - จัดการ Retry Logic เมื่อเจอ Crash หรือ Timeout
     """
-    MAX_URLS_PER_DRIVER = 50  # จำนวน URL ที่จะรันก่อนปิด-เปิด Browser ใหม่
-    MAX_RETRY_PER_URL = 2     # จำนวนครั้งที่จะลองใหม่หากโหลดไม่สำเร็จ
-    retry_count = {}          # เก็บจำนวนครั้งที่ retry ของแต่ละ URL
+    MAX_URLS_PER_DRIVER = 15  # ลดลงเพื่อป้องกัน RAM เต็มบน GitHub Runner
+    MAX_RETRY_PER_URL = 2     
+    retry_count = {}          
 
     while True:
+        # 1. ตรวจสอบว่ายังมีงานใน Queue ไหม
         try:
-            # ดึงงานจาก Queue
             url = url_queue.get(timeout=5)
         except queue.Empty:
             break
 
-        # ตรวจสอบว่าต้องเปิด Driver ใหม่หรือไม่
         driver = None
-        urls_processed = 0
+        urls_processed_in_session = 0
         
         try:
-            print(f"🔧 Starting new browser session for workers...")
+            # 2. เคลียร์ขยะเก่าและเปิด Browser Session ใหม่
+            kill_chrome_instances() 
+            print(f"🔧 Starting fresh browser session...")
             driver = create_driver()
             
-            # รันงานต่อเนื่องในช่วงที่ Driver ยังสดใหม่
-            while url and urls_processed < MAX_URLS_PER_DRIVER:
+            # 3. รันงานตามโควต้าของ Driver ตัวนี้
+            while url and urls_processed_in_session < MAX_URLS_PER_DRIVER:
                 try:
+                    # โหลดหน้าเว็บ
                     driver.get(url)
                     
-                    # Smart Wait: รอให้โครงสร้างหลักโผล่มา
+                    # Smart Wait 1: รอโครงสร้างหลัก
                     WebDriverWait(driver, WAIT_TIMEOUT).until(
                         EC.presence_of_element_located((By.CLASS_NAME, "company-info"))
                     )
 
-                    # Smart Wait: เช็คความพร้อมของ DOM
+                    # Smart Wait 2: รอ Body พร้อม (ป้องกัน scrollHeight error)
                     WebDriverWait(driver, WAIT_TIMEOUT).until(
                         lambda d: d.execute_script('return document.body != null && document.body.scrollHeight > 0;')
                     )
                     
-                    # Scroll และรอข้อมูล (Lazy Load)
+                    # Scroll และรอ Lazy Load
                     driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
                     time.sleep(5) 
                     
-                    # ดึง Source และ Parse
+                    # ดึงข้อมูล
                     html_source = driver.page_source
                     data = parse_page_content(html_source, url)
                     
@@ -228,43 +250,53 @@ def worker_thread(url_queue, result_list):
                     else:
                         print(f"  ⚠️ Scraped (No Data): {url.split('/')[-2]}")
 
-                    urls_processed += 1
+                    # ทำงานสำเร็จ เคลียร์สถานะใน Queue
+                    urls_processed_in_session += 1
                     url_queue.task_done()
                     
-                except (TimeoutException, WebDriverException) as e:
-                    # กรณีพังเฉพาะหน้าเว็บ หรือ Tab Crash
+                    # เตรียมรับ URL ถัดไป (ถ้ายังไม่เกินโควต้า)
+                    if urls_processed_in_session < MAX_URLS_PER_DRIVER:
+                        try:
+                            url = url_queue.get_nowait()
+                        except queue.Empty:
+                            url = None # จบ Loop Session นี้เพราะงานหมด
+                    
+                except Exception as e:
+                    # กรณีพังเฉพาะหน้าเว็บ หรือเกิด ReadTimeoutError ระหว่างรัน
+                    error_type = type(e).__name__
                     error_msg = str(e).split('\n')[0]
                     current_retries = retry_count.get(url, 0)
                     
                     if current_retries < MAX_RETRY_PER_URL:
                         retry_count[url] = current_retries + 1
-                        print(f"  ❌ Error {url.split('/')[-2]}: {error_msg} -> Retrying ({retry_count[url]})")
-                        url_queue.put(url) # ใส่กลับไปต่อคิวใหม่
+                        print(f"  ❌ Error {url.split('/')[-2]} ({error_type}): {error_msg} -> Retrying ({retry_count[url]})")
+                        url_queue.put(url) 
                     else:
                         print(f"  🔥 Failed {url.split('/')[-2]} after {MAX_RETRY_PER_URL} retries. Skipping.")
-                        url_queue.task_done()
                     
-                    # ถ้าเจอ Tab Crash หรือ Driver พัง ให้หลุดจาก loop เล็กไป Restart Driver ทันที
+                    # สำคัญ: ถ้า Error เกิดจากตัว Driver หรือ Session (เช่น ReadTimeout) 
+                    # ต้อง Task_done และ Break เพื่อปิด Driver ทันที
+                    url_queue.task_done()
                     break 
 
-                # เตรียมรับ URL ถัดไป (ถ้ายังมีในโควต้าของ Driver ตัวนี้)
-                if urls_processed < MAX_URLS_PER_DRIVER:
-                    try:
-                        url = url_queue.get_nowait()
-                    except queue.Empty:
-                        url = None
-
         except Exception as e:
-            print(f"💥 Worker Critical Error: {type(e).__name__} - {e}")
+            # กรณี Critical เช่น Driver สร้างไม่สำเร็จ (Create Driver Fail)
+            print(f"💥 Worker Session Crash: {type(e).__name__} - {e}")
             if url:
-                url_queue.task_done() # ป้องกันค้างใน Queue
+                # ถ้ายังมี URL ค้างอยู่แต่ Driver พัง ให้ส่งคืน Queue (ถ้ายังไม่ได้ task_done)
+                # แต่ใน logic นี้เรา task_done ใน loop ย่อยไปแล้ว จึงไม่ต้องทำอะไรเพิ่ม
+                pass
         finally:
+            # 4. ปิด Driver และ Hard Kill เสมอเมื่อจบ Session
             if driver:
                 try:
                     driver.quit()
-                    print(f"♻️ Browser session closed. RAM cleared.")
                 except:
                     pass
+            kill_chrome_instances() 
+            print(f"♻️ RAM cleared. Ready for next session.")
+
+    print("🏁 Worker Thread Finished.")
 
 def process_sector(sector_name, stock_list):
     """จัดการการดึงข้อมูลของ 1 Sector"""
