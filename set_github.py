@@ -77,10 +77,17 @@ def create_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.add_argument("--blink-settings=imagesEnabled=false") # ไม่ต้องโหลดรูปภาพ ประหยัด Bandwidth/RAM
     
     # ใช้ ChromeDriverManager แทนการระบุ Path ในเครื่องตัวเอง
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
+    # ตั้งค่า Page Load Timeout ป้องกันค้างยาว
+    driver.set_page_load_timeout(60)
     return driver
 
 def setup_environment():
@@ -169,73 +176,95 @@ def parse_page_content(html_content, page_url):
     return extracted_data
 
 def worker_thread(url_queue, result_list):
-    """Worker thread ที่จะเปิด Browser ค้างไว้แล้วรับงานจาก Queue (แก้ไขเพิ่ม Delay + Smart Wait Body)"""
-    driver = None
-    try:
-        driver = create_driver()
-        while True:
-            try:
-                url = url_queue.get(timeout=3) # รองาน 3 วิ ถ้าไม่มีคือจบ
-            except queue.Empty:
-                break
+    """
+    Worker thread ที่มีการจัดการ Resource (RAM) และ Retry Logic
+    เพื่อป้องกันปัญหา Tab Crashed และ Timeout บน GitHub Actions
+    """
+    MAX_URLS_PER_DRIVER = 50  # จำนวน URL ที่จะรันก่อนปิด-เปิด Browser ใหม่
+    MAX_RETRY_PER_URL = 2     # จำนวนครั้งที่จะลองใหม่หากโหลดไม่สำเร็จ
+    retry_count = {}          # เก็บจำนวนครั้งที่ retry ของแต่ละ URL
+
+    while True:
+        try:
+            # ดึงงานจาก Queue
+            url = url_queue.get(timeout=5)
+        except queue.Empty:
+            break
+
+        # ตรวจสอบว่าต้องเปิด Driver ใหม่หรือไม่
+        driver = None
+        urls_processed = 0
+        
+        try:
+            print(f"🔧 Starting new browser session for workers...")
+            driver = create_driver()
             
-            try:
-                driver.get(url)
-                
-                # 1. Smart Wait 1: รอให้โครงสร้างหลักโผล่มาก่อน (Company Info)
-                WebDriverWait(driver, WAIT_TIMEOUT).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "company-info"))
-                )
+            # รันงานต่อเนื่องในช่วงที่ Driver ยังสดใหม่
+            while url and urls_processed < MAX_URLS_PER_DRIVER:
+                try:
+                    driver.get(url)
+                    
+                    # Smart Wait: รอให้โครงสร้างหลักโผล่มา
+                    WebDriverWait(driver, WAIT_TIMEOUT).until(
+                        EC.presence_of_element_located((By.CLASS_NAME, "company-info"))
+                    )
 
-                # ==================================================
-                # 🛠️ ส่วนที่แก้ไข: Smart Wait 2: รอให้ Body/DOM พร้อมใช้งาน (แก้ Error scrollHeight)
-                # ==================================================
-                
-                # รอก่อนสั่ง Scroll เพื่อให้มั่นใจว่า document.body ถูกสร้างแล้ว
-                WebDriverWait(driver, WAIT_TIMEOUT).until(
-                    lambda d: d.execute_script('return document.body != null && document.body.scrollHeight > 0;')
-                )
-                
-                # สั่ง Scroll ลงมากลาง ๆ เพื่อกระตุ้น Lazy Load (ถ้ามี)
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
-                time.sleep(1) # รอจังหวะ scroll
-                
-                # รอให้ตัวเลขงบการเงินวิ่งมาให้ครบ (สำคัญมาก, เพิ่มจาก 3 เป็น 5 เพื่อความชัวร์, แก้ Read timed out)
-                time.sleep(5) 
-                
-                # ==================================================
+                    # Smart Wait: เช็คความพร้อมของ DOM
+                    WebDriverWait(driver, WAIT_TIMEOUT).until(
+                        lambda d: d.execute_script('return document.body != null && document.body.scrollHeight > 0;')
+                    )
+                    
+                    # Scroll และรอข้อมูล (Lazy Load)
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
+                    time.sleep(5) 
+                    
+                    # ดึง Source และ Parse
+                    html_source = driver.page_source
+                    data = parse_page_content(html_source, url)
+                    
+                    if data:
+                        result_list.extend(data)
+                        print(f"  ✓ Scraped: {url.split('/')[-2]}")
+                    else:
+                        print(f"  ⚠️ Scraped (No Data): {url.split('/')[-2]}")
 
-                # ดึง Source ทีเดียว
-                html_source = driver.page_source
-                
-                # ส่งไปแกะข้อมูล (CPU bound)
-                data = parse_page_content(html_source, url)
-                
-                # Thread-safe append
-                result_list.extend(data)
-                
-                # ตรวจสอบความสำเร็จจากข้อมูลที่ได้
-                if data:
-                    print(f"  ✓ Scraped: {url.split('/')[-2]}")
-                else:
-                    print(f"  ⚠️ Scraped (No Data): {url.split('/')[-2]}") # พบแล้วแต่ไม่มีข้อมูลเลย
-                
-            except TimeoutException as e:
-                print(f"  ❌ Error {url}: Timeout (Page did not load key elements)")
-            except WebDriverException as e:
-                # Catch JavaScript Error & Timeout/Connection Error
-                print(f"  ❌ Error {url}: WebDriver Error ({e.msg.split('\\n')[0]})")
-            except Exception as e:
-                # Catch All Other Errors
-                print(f"  ❌ Error {url}: Unexpected Error ({type(e).__name__}) - {e}")
-            finally:
-                url_queue.task_done()
-                
-    except Exception as e:
-        print(f"🔥 Worker Initialization Error: {e}")
-    finally:
-        if driver:
-            driver.quit()
+                    urls_processed += 1
+                    url_queue.task_done()
+                    
+                except (TimeoutException, WebDriverException) as e:
+                    # กรณีพังเฉพาะหน้าเว็บ หรือ Tab Crash
+                    error_msg = str(e).split('\n')[0]
+                    current_retries = retry_count.get(url, 0)
+                    
+                    if current_retries < MAX_RETRY_PER_URL:
+                        retry_count[url] = current_retries + 1
+                        print(f"  ❌ Error {url.split('/')[-2]}: {error_msg} -> Retrying ({retry_count[url]})")
+                        url_queue.put(url) # ใส่กลับไปต่อคิวใหม่
+                    else:
+                        print(f"  🔥 Failed {url.split('/')[-2]} after {MAX_RETRY_PER_URL} retries. Skipping.")
+                        url_queue.task_done()
+                    
+                    # ถ้าเจอ Tab Crash หรือ Driver พัง ให้หลุดจาก loop เล็กไป Restart Driver ทันที
+                    break 
+
+                # เตรียมรับ URL ถัดไป (ถ้ายังมีในโควต้าของ Driver ตัวนี้)
+                if urls_processed < MAX_URLS_PER_DRIVER:
+                    try:
+                        url = url_queue.get_nowait()
+                    except queue.Empty:
+                        url = None
+
+        except Exception as e:
+            print(f"💥 Worker Critical Error: {type(e).__name__} - {e}")
+            if url:
+                url_queue.task_done() # ป้องกันค้างใน Queue
+        finally:
+            if driver:
+                try:
+                    driver.quit()
+                    print(f"♻️ Browser session closed. RAM cleared.")
+                except:
+                    pass
 
 def process_sector(sector_name, stock_list):
     """จัดการการดึงข้อมูลของ 1 Sector"""
