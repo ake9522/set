@@ -27,7 +27,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ==========================================
 MAX_WORKERS = 2  # จำนวนหน้าต่าง Chrome ที่จะเปิดพร้อมกัน (ปรับตามความแรงเครื่อง)
 HEADLESS_MODE = True # แนะนำให้เป็น True เพื่อความเร็วและไม่เกะกะ
-WAIT_TIMEOUT = 10 # วินาทีสูงสุดที่จะรอ element
+WAIT_TIMEOUT = 20 # วินาทีสูงสุดที่จะรอ element
 
 # Path Configuration
 LOCAL_PATH = "./" 
