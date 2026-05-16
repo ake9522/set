@@ -1,7 +1,7 @@
 <table cellSpacing="0" cellPadding="0" width="100%" border="0">
   <tr>
     <td colspan="6" align="left"><strong>รายชื่อบริษัทจดทะเบียนในตลาดหลักทรัพย์แห่งประเทศไทย</strong></td>
-    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 11 พ.ค. 2569<strong></td>
+    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 18 พ.ค. 2569<strong></td>
   </tr>
   <tr align="center" bgcolor="#C0C0C0"> 
     <td nowrap><strong>หลักทรัพย์</strong></td>
@@ -854,6 +854,18 @@
     <td nowrap>0-2285-1888, 0-2680-1111</td>
     <td nowrap>0-2285-1901-2</td>
     <td nowrap>www.asiaplusgroup.co.th</td>
+  </tr>
+  <tr> 
+    <td nowrap>ASTR</td>
+    <td nowrap>บริษัท แอสตรา เอ็นเตอร์ไพรส์ จำกัด (มหาชน)</td>
+    <td nowrap>mai</td>
+    <td nowrap>บริการ</td>
+    <td nowrap>-</td>
+    <td nowrap>15 ซอยพัฒนาการ 56 แขวงสวนหลวง เขตสวนหลวง กรุงเทพมหานคร</td>
+    <td nowrap>10250</td>
+    <td nowrap>0-2321-6999</td>
+    <td nowrap>0-2321-1789</td>
+    <td nowrap>www.dv8.co.th</td>
   </tr>
   <tr> 
     <td nowrap>ASW</td>
@@ -2752,18 +2764,6 @@
     <td nowrap>http://www.dusit.com</td>
   </tr>
   <tr> 
-    <td nowrap>DV8</td>
-    <td nowrap>บริษัท ดีวี8 จำกัด (มหาชน)</td>
-    <td nowrap>mai</td>
-    <td nowrap>บริการ</td>
-    <td nowrap>-</td>
-    <td nowrap>15 ซอยพัฒนาการ 56 แขวงสวนหลวง เขตสวนหลวง กรุงเทพมหานคร</td>
-    <td nowrap>10250</td>
-    <td nowrap>0-2321-6999</td>
-    <td nowrap>0-2321-1789</td>
-    <td nowrap>www.dv8.co.th</td>
-  </tr>
-  <tr> 
     <td nowrap>EA</td>
     <td nowrap>บริษัท พลังงานบริสุทธิ์ จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
@@ -3578,18 +3578,6 @@
     <td nowrap>0-2318-9744</td>
     <td nowrap>0-2318-9744 Ext. 4000</td>
     <td nowrap>www.harn.co.th</td>
-  </tr>
-  <tr> 
-    <td nowrap>HEALTH</td>
-    <td nowrap>บริษัท เฮลท์ เอ็มไพร์ คอร์ปอเรชั่น จำกัด (มหาชน)</td>
-    <td nowrap>mai</td>
-    <td nowrap>บริการ</td>
-    <td nowrap>-</td>
-    <td nowrap>เลขที่ 24 ซอยรามคำแหง 22 (จิตตรานุเคราะห์) ถนนรามคำแหง แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร</td>
-    <td nowrap>10240</td>
-    <td nowrap>0-2514-5000</td>
-    <td nowrap><div align="center">-</div></td>
-    <td nowrap>https://www.healthempire.co.th/</td>
   </tr>
   <tr> 
     <td nowrap>HENG</td>
@@ -7000,18 +6988,6 @@
     <td nowrap>www.premiertankcorp.com</td>
   </tr>
   <tr> 
-    <td nowrap>PTECH</td>
-    <td nowrap>บริษัท พลัส เทค อินโนเวชั่น จำกัด (มหาชน)</td>
-    <td nowrap>SET</td>
-    <td nowrap>บริการ</td>
-    <td nowrap>สื่อและสิ่งพิมพ์</td>
-    <td nowrap>41/1 ซอยวัดสวนส้ม ถนนปู่เจ้าสมิงพราย ตำบลสำโรงใต้ อำเภอพระประแดง สมุทรปราการ</td>
-    <td nowrap>10130</td>
-    <td nowrap>0-2394-4374-5, 0-2754-2650</td>
-    <td nowrap>0-2384-0917</td>
-    <td nowrap>www.plustech.co.th</td>
-  </tr>
-  <tr> 
     <td nowrap>PTG</td>
     <td nowrap>บริษัท พีทีจี เอ็นเนอยี จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
@@ -9124,6 +9100,18 @@
     <td nowrap>www.tbn.co.th</td>
   </tr>
   <tr> 
+    <td nowrap>TBSP</td>
+    <td nowrap>บริษัท ทีบีเอสพี จำกัด (มหาชน)</td>
+    <td nowrap>SET</td>
+    <td nowrap>บริการ</td>
+    <td nowrap>สื่อและสิ่งพิมพ์</td>
+    <td nowrap>41/1 ซอยวัดสวนส้ม ถนนปู่เจ้าสมิงพราย ตำบลสำโรงใต้ อำเภอพระประแดง สมุทรปราการ</td>
+    <td nowrap>10130</td>
+    <td nowrap>0-2394-4374-5, 0-2754-2650</td>
+    <td nowrap>0-2384-0917</td>
+    <td nowrap>www.plustech.co.th</td>
+  </tr>
+  <tr> 
     <td nowrap>TC</td>
     <td nowrap>บริษัท ทรอปิคอลแคนนิ่ง (ประเทศไทย) จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
@@ -9637,7 +9625,7 @@
     <td nowrap>10110</td>
     <td nowrap>0-2392-9750</td>
     <td nowrap><div align="center">-</div></td>
-    <td nowrap>https://www.techleadnpn.co.th/</td>
+    <td nowrap>https://www.techleadnext.com/</td>
   </tr>
   <tr> 
     <td nowrap>TLHPF</td>
@@ -10730,6 +10718,18 @@
     <td nowrap>0-2273-8884</td>
     <td nowrap>0-2273-8883</td>
     <td nowrap>www.vgi.co.th</td>
+  </tr>
+  <tr> 
+    <td nowrap>VIBE</td>
+    <td nowrap>บริษัท ไวบ์ ซินเนอร์จี้ กรุ๊ป จำกัด (มหาชน)</td>
+    <td nowrap>mai</td>
+    <td nowrap>บริการ</td>
+    <td nowrap>-</td>
+    <td nowrap>เลขที่ 24 ซอยรามคำแหง 22 (จิตตรานุเคราะห์) ถนนรามคำแหง แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร</td>
+    <td nowrap>10240</td>
+    <td nowrap>0-2514-5000</td>
+    <td nowrap><div align="center">-</div></td>
+    <td nowrap>https://www.vibesynergygroup.com</td>
   </tr>
   <tr> 
     <td nowrap>VIBHA</td>
