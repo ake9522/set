@@ -1,7 +1,7 @@
 <table cellSpacing="0" cellPadding="0" width="100%" border="0">
   <tr>
     <td colspan="6" align="left"><strong>รายชื่อบริษัทจดทะเบียนในตลาดหลักทรัพย์แห่งประเทศไทย</strong></td>
-    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 25 พ.ค. 2569<strong></td>
+    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 02 มิ.ย. 2569<strong></td>
   </tr>
   <tr align="center" bgcolor="#C0C0C0"> 
     <td nowrap><strong>หลักทรัพย์</strong></td>
@@ -703,8 +703,8 @@
     <td nowrap>AQUA</td>
     <td nowrap>บริษัท อควา คอร์เปอเรชั่น จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
-    <td nowrap>บริการ</td>
-    <td nowrap>สื่อและสิ่งพิมพ์</td>
+    <td nowrap>เกษตรและอุตสาหกรรมอาหาร</td>
+    <td nowrap>อาหารและเครื่องดื่ม</td>
     <td nowrap>อาคารอาร์เอสทาวเวอร์ ชั้น 21, 121/68-69 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดง กรุงเทพมหานคร</td>
     <td nowrap>10400</td>
     <td nowrap>0-2041-8888</td>
@@ -763,8 +763,8 @@
     <td nowrap>ASAP</td>
     <td nowrap>บริษัท ซินเนอร์เจติค ออโต้ เพอร์ฟอร์มานซ์ จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
-    <td nowrap>ธุรกิจการเงิน</td>
-    <td nowrap>เงินทุนและหลักทรัพย์</td>
+    <td nowrap>สินค้าอุตสาหกรรม</td>
+    <td nowrap>ยานยนต์</td>
     <td nowrap>149 หมู่ที่ 3 ถนนเทพารักษ์ ตำบลเทพารักษ์ อำเภอเมืองสมุทรปราการ สมุทรปราการ</td>
     <td nowrap>10270</td>
     <td nowrap>0-2091-8181</td>
@@ -2889,10 +2889,10 @@
     <td nowrap>mai</td>
     <td nowrap>อสังหาริมทรัพย์และก่อสร้าง</td>
     <td nowrap>-</td>
-    <td nowrap>เลขที่ 89 อาคาร เอไอเอ แคปปิตอล เซ็นเตอร์ ชั้น 9 ห้อง 901 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดง กรุงเทพมหานคร</td>
-    <td nowrap>10400</td>
+    <td nowrap>เลขที่ 1745 ซอยลาดพร้าว 94 (ปัญจมิตร) แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร</td>
+    <td nowrap>10310</td>
     <td nowrap>0-2248-1948</td>
-    <td nowrap>0-2248-1949</td>
+    <td nowrap><div align="center">-</div></td>
     <td nowrap>https://www.orgempire.com</td>
   </tr>
   <tr> 
@@ -3335,8 +3335,8 @@
     <td nowrap>ปิโตรเคมีและเคมีภัณฑ์</td>
     <td nowrap>เลขที่ 555/1 ศูนย์เอนเนอร์ยี่คอมเพล็กซ์ อาคารเอ ชั้น 4 ถนนวิภาวดีรังสิต แขวงจตุจักร เขตจตุจักร กรุงเทพมหานคร</td>
     <td nowrap>10900</td>
-    <td nowrap>0-2558-7300</td>
-    <td nowrap>0-2558-7301</td>
+    <td nowrap>0-2265-8300</td>
+    <td nowrap>0-2265-8302</td>
     <td nowrap>http://www.ggcplc.com</td>
   </tr>
   <tr> 
@@ -3787,8 +3787,8 @@
     <td nowrap>IHL</td>
     <td nowrap>บริษัท อินเตอร์ไฮด์ จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
-    <td nowrap>สินค้าอุตสาหกรรม</td>
-    <td nowrap>ยานยนต์</td>
+    <td nowrap>สินค้าอุปโภคบริโภค</td>
+    <td nowrap>แฟชั่น</td>
     <td nowrap>678 ซอยที.เจ.ซี. ถนนสุขุมวิท ตำบลบางปูใหม่ อำเภอเมือง สมุทรปราการ</td>
     <td nowrap>10280</td>
     <td nowrap>0-2028-9728-37</td>
@@ -4279,7 +4279,7 @@
     <td nowrap>K</td>
     <td nowrap>บริษัท คิงส์เมน ซี.เอ็ม.ที.ไอ. จำกัด (มหาชน)</td>
     <td nowrap>mai</td>
-    <td nowrap>อสังหาริมทรัพย์และก่อสร้าง</td>
+    <td nowrap>บริการ</td>
     <td nowrap>-</td>
     <td nowrap>9/19 หมู่ที่ 7 ตำบลบึงคำพร้อย อำเภอลำลูกกา ปทุมธานี</td>
     <td nowrap>12150</td>
@@ -5815,8 +5815,8 @@
     <td nowrap>NEP</td>
     <td nowrap>บริษัท เอ็นอีพี อสังหาริมทรัพย์ และอุตสาหกรรม จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
-    <td nowrap>สินค้าอุตสาหกรรม</td>
-    <td nowrap>บรรจุภัณฑ์</td>
+    <td nowrap>สินค้าอุปโภคบริโภค</td>
+    <td nowrap>แฟชั่น</td>
     <td nowrap>41 ซอยพหลโยธิน 5 ถนนพหลโยธิน แขวงพญาไท เขตพญาไท กรุงเทพมหานคร</td>
     <td nowrap>10400</td>
     <td nowrap>0-2271-4213-16</td>
@@ -9537,10 +9537,10 @@
     <td nowrap>SET</td>
     <td nowrap>อสังหาริมทรัพย์และก่อสร้าง</td>
     <td nowrap>พัฒนาอสังหาริมทรัพย์</td>
-    <td nowrap>เลขที่ 444 - 444/1 ถนนประชาอุทิศ แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพมหานคร</td>
-    <td nowrap>10310</td>
-    <td nowrap>0-2103-6444</td>
-    <td nowrap>0-2103-2444</td>
+    <td nowrap>เลขที่ 234 หมู่ที่ 5 ตำบลสาคู อำเภอถลาง ภูเก็ต</td>
+    <td nowrap>83110</td>
+    <td nowrap>0-7662-4999</td>
+    <td nowrap><div align="center">-</div></td>
     <td nowrap>www.thetitleresidence.com</td>
   </tr>
   <tr> 
@@ -9607,8 +9607,8 @@
     <td nowrap>TL</td>
     <td nowrap>บริษัท เทคลีด เน็กซ์ จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
-    <td nowrap>เกษตรและอุตสาหกรรมอาหาร</td>
-    <td nowrap>ธุรกิจการเกษตร</td>
+    <td nowrap>เทคโนโลยี</td>
+    <td nowrap>เทคโนโลยีสารสนเทศและการสื่อสาร</td>
     <td nowrap>1319 อาคารเอแพค ทาวเวอร์ ชั้นที่ 26 ถนนสุขุมวิท แขวงพระโขนงเหนือ เขตวัฒนา กรุงเทพมหานคร</td>
     <td nowrap>10110</td>
     <td nowrap>0-2392-9750</td>
