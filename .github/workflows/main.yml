@@ -3,7 +3,7 @@ name: SET Scraper Automation
 on:
   schedule:
     # 04:00 น. เวลาไทย คือ 21:00 น. ของวันเดียวกันในเวลา UTC (ทุกวัน)
-    - cron: '0 21 * * *'
+    - cron: '13 21 * * *'
   workflow_dispatch: # ปุ่มกดรันเองเพื่อทดสอบ
 
 jobs:
