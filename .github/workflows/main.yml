@@ -2,8 +2,8 @@ name: SET Scraper Automation
 
 on:
   schedule:
-    # 03:43 น. เวลาไทย = 20:43 UTC ของวันก่อนหน้า
-    - cron: '43 20 * * *'
+    # 03:13 น. เวลาไทย = 20:43 UTC ของวันก่อนหน้า
+    - cron: '13 20 * * *'
   workflow_dispatch: # ปุ่มกดรันเองเพื่อทดสอบ
 
 jobs:
