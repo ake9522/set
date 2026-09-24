@@ -21,6 +21,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from lxml import html as lxml_html
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from urllib.parse import urljoin, urlparse, parse_qs
 
 # ==========================================
 # CONFIGURATION
@@ -145,32 +146,75 @@ def setup_environment():
     return df
 
 def parse_page_content(html_content, page_url):
-    """แกะข้อมูลจาก HTML string โดยใช้ lxml (เร็วกว่า Selenium find_element มาก)"""
+    """แกะข้อมูลจาก HTML string โดยใช้ lxml"""
     tree = lxml_html.fromstring(html_content)
     extracted_data = []
 
     for label, xpath in XPATH_MAPPINGS.items():
         try:
             elements = tree.xpath(xpath)
+
             for el in elements:
-                # แปลง element กลับเป็น html string เพื่อเช็ค table
-                el_html = lxml_html.tostring(el, encoding='unicode')
-                
-                # --- ส่วนที่เพิ่มของการดึง annual report ---
+                # News Wrapper: เก็บข้อความเดิม และเพิ่ม URL ข่าว
+                if label == "News Wrapper":
+                    original_text = el.text_content().strip()
+                    news_links = []
+                    seen = set()
+
+                    for anchor in el.xpath('.//a[@href]'):
+                        href = (anchor.get("href") or "").strip()
+                        if not href:
+                            continue
+
+                        link = urljoin(page_url, href)
+                        candidates = [link]
+
+                        # URL ข่าวอาจฝังอยู่ในลิงก์แชร์
+                        query = parse_qs(urlparse(link).query)
+                        for key in ("u", "url"):
+                            candidates.extend(query.get(key, []))
+
+                        for candidate in candidates:
+                            candidate = urljoin(page_url, candidate)
+                            parsed = urlparse(candidate)
+
+                            if (
+                                parsed.netloc == "www.set.or.th"
+                                and "/market/news-and-alert/newsdetails" in parsed.path
+                                and candidate not in seen
+                            ):
+                                seen.add(candidate)
+                                news_links.append(candidate)
+
+                    if original_text:
+                        extracted_data.append([
+                            label,
+                            page_url,
+                            original_text,          # Column1: ข้อความเดิมทั้งหมด
+                            "\n".join(news_links)  # Column2: URL ข่าว แยกด้วยบรรทัดใหม่
+                        ])
+                    continue
+
+                # Annual Report: คงการดึง URL เดิม
                 if label == "Annual Report":
-                    # ดึงค่าจาก attribute 'href'
-                    link = el.get('href')
+                    link = el.get("href")
                     if link:
                         extracted_data.append([label, page_url, link])
-                    continue # ทำตัวถัดไปเลย ไม่ต้องไปเช็ค table ต่อ
+                    continue
+
+                # ส่วนอื่นคงตามฟังก์ชันเดิม
+                el_html = lxml_html.tostring(el, encoding="unicode")
 
                 if "<table" in el_html.lower():
                     try:
-                        # ใช้ pandas read_html กับ string
                         tables = pd.read_html(StringIO(el_html))
+
                         for df in tables:
                             if isinstance(df.columns, pd.MultiIndex):
-                                df.columns = [' | '.join([str(c) for c in col if c]) for col in df.columns]
+                                df.columns = [
+                                    " | ".join(str(c) for c in col if c)
+                                    for col in df.columns
+                                ]
                             else:
                                 df.columns = df.columns.astype(str)
 
@@ -178,16 +222,18 @@ def parse_page_content(html_content, page_url):
                             extracted_data.append(header_row)
 
                             for row in df.itertuples(index=False, name=None):
-                                extracted_data.append([label, page_url] + list(row))
+                                extracted_data.append(
+                                    [label, page_url] + list(row)
+                                )
                     except Exception:
-                        pass # Table parse error
+                        pass
                 else:
-                    # Text content
                     text = el.text_content().strip()
                     if text:
                         extracted_data.append([label, page_url, text])
+
         except Exception:
-            pass # XPath error
+            pass
 
     return extracted_data
 
