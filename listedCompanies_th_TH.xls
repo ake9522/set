@@ -1,7 +1,7 @@
 <table cellSpacing="0" cellPadding="0" width="100%" border="0">
   <tr>
     <td colspan="6" align="left"><strong>รายชื่อบริษัทจดทะเบียนในตลาดหลักทรัพย์แห่งประเทศไทย</strong></td>
-    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 21 ก.ย. 2569<strong></td>
+    <td colspan="4" align="right"><strong>ข้อมูล ณ วันที่ 28 ก.ย. 2569<strong></td>
   </tr>
   <tr align="center" bgcolor="#C0C0C0"> 
     <td nowrap><strong>หลักทรัพย์</strong></td>
@@ -3434,6 +3434,18 @@
     <td nowrap>0-2659-8888</td>
     <td nowrap>0-2659-8860</td>
     <td nowrap>www.one-asset.com</td>
+  </tr>
+  <tr> 
+    <td nowrap>GST</td>
+    <td nowrap>บริษัท กัลฟ์ สเปซ เทคโนโลยี จำกัด (มหาชน)</td>
+    <td nowrap>SET</td>
+    <td nowrap>เทคโนโลยี</td>
+    <td nowrap>เทคโนโลยีสารสนเทศและการสื่อสาร</td>
+    <td nowrap>87/1 อาคารแคปปิตอล ทาวเวอร์ ชั้น 23 ถนนวิทยุ แขวงลุมพินี เขตปทุมวัน กรุงเทพมหานคร</td>
+    <td nowrap>10330</td>
+    <td nowrap>0-2591-0736-49</td>
+    <td nowrap>0-2591-0705, 0-2299-5252</td>
+    <td nowrap>www.thaicom.net</td>
   </tr>
   <tr> 
     <td nowrap>GSTEEL</td>
@@ -7715,7 +7727,7 @@
     <td nowrap>วัสดุก่อสร้าง</td>
     <td nowrap>1 ถนนปูนซิเมนต์ไทย แขวงบางซื่อ เขตบางซื่อ กรุงเทพมหานคร</td>
     <td nowrap>10800</td>
-    <td nowrap>0-2586-3333,0-2586-5474</td>
+    <td nowrap>0-2586-1088</td>
     <td nowrap><div align="center">-</div></td>
     <td nowrap>www.scgdecor.com</td>
   </tr>
@@ -9352,18 +9364,6 @@
     <td nowrap>www.ratchthani.com</td>
   </tr>
   <tr> 
-    <td nowrap>THCOM</td>
-    <td nowrap>บริษัท ไทยคม จำกัด (มหาชน)</td>
-    <td nowrap>SET</td>
-    <td nowrap>เทคโนโลยี</td>
-    <td nowrap>เทคโนโลยีสารสนเทศและการสื่อสาร</td>
-    <td nowrap>87/1 อาคารแคปปิตอล ทาวเวอร์ ชั้น 23 ถนนวิทยุ แขวงลุมพินี เขตปทุมวัน กรุงเทพมหานคร</td>
-    <td nowrap>10330</td>
-    <td nowrap>0-2591-0736-49</td>
-    <td nowrap>0-2591-0705, 0-2299-5252</td>
-    <td nowrap>www.thaicom.net</td>
-  </tr>
-  <tr> 
     <td nowrap>THE</td>
     <td nowrap>บริษัท เดอะ สตีล จำกัด (มหาชน)</td>
     <td nowrap>SET</td>
@@ -10693,7 +10693,7 @@
     <td nowrap>10240</td>
     <td nowrap>0-2514-5000</td>
     <td nowrap><div align="center">-</div></td>
-    <td nowrap>https://www.vibesynergygroup.com</td>
+    <td nowrap>https://www.vibe.co.th</td>
   </tr>
   <tr> 
     <td nowrap>VIBHA</td>
