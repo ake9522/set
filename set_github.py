@@ -37,7 +37,7 @@ LOCAL_PATH_DATA = "./data_factsheet/"
 # XPATH Mappings (คงเดิม)
 XPATH_MAPPINGS = {
     "Last Update": '//div[@class="card-product card-product shadow-none"]//div[@class="card-product-body d-flex flex-column"]',
-    "Nature Business": '//div[@class="nature-business"]//div[@class="row col-12"]',
+    "Nature Business": '//div[@class="nature-business"]//div[@class="business-col col-12"]',
     "Card Minimal Left": '//div[@class="price-info-wrapper"]//div[@class="card-minimal"]//div//div[@class="price-left-col"]',
     "Card Minimal Right": '//div[@class="price-info-wrapper"]//div[@class="card-minimal"]//div//div[@class="price-right-col"]',
     "Company Info": '//div[@class="company-info d-flex flex-column me-auto"]',
