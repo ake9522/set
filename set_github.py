@@ -214,7 +214,8 @@ def setup_environment():
                 BytesIO(content), sheet_name=None, header=None, engine="openpyxl"
             ).values()
         else:
-            tables = pd.read_html(BytesIO(content), flavor="lxml")
+            html = content.decode("ISO-8859-11")
+            tables = pd.read_html(StringIO(html), flavor="lxml")
 
         df = None
         for table in tables:
@@ -240,6 +241,12 @@ def setup_environment():
                 break
 
         if df is None:
+            for number, table in enumerate(tables, start=1):
+                print(
+                    f"SET table {number} | columns={table.columns.tolist()!r}"
+                    f" | first rows={table.head(5).values.tolist()!r}",
+                    flush=True,
+                )
             raise ValueError("ไม่พบคอลัมน์ 'หลักทรัพย์' และ 'กลุ่มอุตสาหกรรม'")
 
         df = df.dropna(subset=["หลักทรัพย์"]).reset_index(drop=True)
