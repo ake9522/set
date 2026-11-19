@@ -154,18 +154,55 @@ def setup_environment():
     data_path = Path(LOCAL_PATH_DATA)
     required_columns = {"หลักทรัพย์", "กลุ่มอุตสาหกรรม"}
 
-    response = requests.get(url, timeout=(10, 60))
-    content = response.content
+    download_attempts = 3
+    retry_delays = (5, 15)
 
-    print(
-        f"SET download | HTTP {response.status_code}"
-        f" | URL: {response.url}"
-        f" | Content-Type: {response.headers.get('Content-Type', '(ไม่มี)')}"
-        f" | Bytes: {len(content):,}"
-        f" | Signature: {content[:8].hex()}",
-        flush=True,
-    )
-    response.raise_for_status()
+    for attempt in range(1, download_attempts + 1):
+        response = requests.get(url, timeout=(10, 60))
+        content = response.content
+
+        print(
+            f"SET download [{attempt}/{download_attempts}]"
+            f" | HTTP {response.status_code}"
+            f" | URL: {response.url}"
+            f" | Content-Type: {response.headers.get('Content-Type', '(ไม่มี)')}"
+            f" | Bytes: {len(content):,}"
+            f" | Signature: {content[:8].hex()}",
+            flush=True,
+        )
+
+        if response.ok:
+            is_excel = content.startswith(
+                (bytes.fromhex("d0cf11e0a1b11ae1"), b"PK\x03\x04")
+            )
+            page = None
+            if not is_excel and content.strip():
+                page = lxml_html.fromstring(content)
+
+            if is_excel or (page is not None and page.xpath("boolean(//table)")):
+                break
+
+            page_text = " ".join(page.text_content().split()) if page is not None else ""
+            print(
+                f"SET ส่งข้อมูลที่ไม่มีตาราง | ข้อความ: {page_text[:250] or '(ไม่มี)'}",
+                flush=True,
+            )
+        elif response.status_code not in {429, 500, 502, 503, 504}:
+            response.raise_for_status()
+
+        if attempt == download_attempts:
+            response.raise_for_status()
+            raise RuntimeError(
+                f"SET ไม่ส่งตารางรายชื่อหลักทรัพย์หลังลอง {download_attempts} ครั้ง"
+            )
+
+        delay = retry_delays[attempt - 1]
+        retry_after = response.headers.get("Retry-After", "")
+        if retry_after.isdigit():
+            delay = max(delay, int(retry_after))
+
+        print(f"รอ {delay} วินาทีก่อนดาวน์โหลดใหม่", flush=True)
+        time.sleep(delay)
 
     try:
         if content.startswith(bytes.fromhex("d0cf11e0a1b11ae1")):
