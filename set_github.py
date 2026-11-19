@@ -10,7 +10,7 @@ import time
 import threading
 import queue
 import subprocess
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, wait
 from selenium import webdriver
