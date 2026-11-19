@@ -107,42 +107,123 @@ def create_driver():
     
     raise Exception("🔥 Failed to initialize Chrome after multiple retries.")
 
+# def setup_environment():
+#     """เตรียม Folder และไฟล์ตั้งต้น"""
+#     print("🔧 กำลังเตรียม Environment...")
+#     if os.path.exists(LOCAL_PATH_DATA):
+#         shutil.rmtree(LOCAL_PATH_DATA)
+#     os.makedirs(LOCAL_PATH_DATA, exist_ok=True)
+#     print(f"✅ สร้างโฟลเดอร์ {LOCAL_PATH_DATA} แล้ว")
+
+#     # Download & Prepare Master File
+#     xls_path = os.path.join(LOCAL_PATH, 'listedCompanies_th_TH.xls')
+#     csv_path = os.path.join(LOCAL_PATH, 'listedCompanies_th_TH.csv')
+    
+#     # Clean old files
+#     for p in [xls_path, csv_path]:
+#         if os.path.exists(p):
+#             os.remove(p)
+
+#     # Download
+#     url = "https://www.set.or.th/dat/eod/listedcompany/static/listedCompanies_th_TH.xls"
+#     print(f"📥 กำลังดาวน์โหลด {url}...")
+#     # resp = requests.get(url) # <--- (รันแล้วติด Certificate ที่ office) จุดที่ Error
+
+#     # เพิ่ม verify=False เพื่อข้ามการตรวจ SSL
+#     resp = requests.get(url, verify=False)
+#     with open(xls_path, "wb") as f:
+#         f.write(resp.content)
+    
+#     # Convert to CSV
+#     print("🔄 กำลังแปลงไฟล์เป็น CSV...")
+#     df_list = pd.read_html(xls_path, encoding="ISO-8859-11")
+#     df = df_list[0]
+#     df = df.iloc[1:].reset_index(drop=True) # ลบแถวแรก
+#     df.columns = df.iloc[0] # ตั้ง header
+#     df = df[1:].reset_index(drop=True) # ลบแถว header ซ้ำ
+#     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+#     print("✅ เตรียมไฟล์ตั้งต้นเสร็จสิ้น")
+#     return df
+
 def setup_environment():
-    """เตรียม Folder และไฟล์ตั้งต้น"""
-    print("🔧 กำลังเตรียม Environment...")
-    if os.path.exists(LOCAL_PATH_DATA):
-        shutil.rmtree(LOCAL_PATH_DATA)
-    os.makedirs(LOCAL_PATH_DATA, exist_ok=True)
-    print(f"✅ สร้างโฟลเดอร์ {LOCAL_PATH_DATA} แล้ว")
+    print("🔧 กำลังเตรียม Environment...", flush=True)
 
-    # Download & Prepare Master File
-    xls_path = os.path.join(LOCAL_PATH, 'listedCompanies_th_TH.xls')
-    csv_path = os.path.join(LOCAL_PATH, 'listedCompanies_th_TH.csv')
-    
-    # Clean old files
-    for p in [xls_path, csv_path]:
-        if os.path.exists(p):
-            os.remove(p)
-
-    # Download
     url = "https://www.set.or.th/dat/eod/listedcompany/static/listedCompanies_th_TH.xls"
-    print(f"📥 กำลังดาวน์โหลด {url}...")
-    # resp = requests.get(url) # <--- (รันแล้วติด Certificate ที่ office) จุดที่ Error
+    xls_path = Path(LOCAL_PATH) / "listedCompanies_th_TH.xls"
+    csv_path = Path(LOCAL_PATH) / "listedCompanies_th_TH.csv"
+    data_path = Path(LOCAL_PATH_DATA)
+    required_columns = {"หลักทรัพย์", "กลุ่มอุตสาหกรรม"}
 
-    # เพิ่ม verify=False เพื่อข้ามการตรวจ SSL
-    resp = requests.get(url, verify=False)
-    with open(xls_path, "wb") as f:
-        f.write(resp.content)
-    
-    # Convert to CSV
-    print("🔄 กำลังแปลงไฟล์เป็น CSV...")
-    df_list = pd.read_html(xls_path, encoding="ISO-8859-11")
-    df = df_list[0]
-    df = df.iloc[1:].reset_index(drop=True) # ลบแถวแรก
-    df.columns = df.iloc[0] # ตั้ง header
-    df = df[1:].reset_index(drop=True) # ลบแถว header ซ้ำ
+    response = requests.get(url, timeout=(10, 60))
+    content = response.content
+
+    print(
+        f"SET download | HTTP {response.status_code}"
+        f" | URL: {response.url}"
+        f" | Content-Type: {response.headers.get('Content-Type', '(ไม่มี)')}"
+        f" | Bytes: {len(content):,}"
+        f" | Signature: {content[:8].hex()}",
+        flush=True,
+    )
+    response.raise_for_status()
+
+    try:
+        if content.startswith(bytes.fromhex("d0cf11e0a1b11ae1")):
+            tables = pd.read_excel(
+                BytesIO(content), sheet_name=None, header=None, engine="xlrd"
+            ).values()
+        elif content.startswith(b"PK\x03\x04"):
+            tables = pd.read_excel(
+                BytesIO(content), sheet_name=None, header=None, engine="openpyxl"
+            ).values()
+        else:
+            tables = pd.read_html(BytesIO(content), flavor="lxml")
+
+        df = None
+        for table in tables:
+            columns = [
+                str(column[-1] if isinstance(column, tuple) else column).strip()
+                for column in table.columns
+            ]
+            if required_columns.issubset(columns):
+                df = table.copy()
+                df.columns = columns
+                break
+
+            for position, row in enumerate(
+                table.itertuples(index=False, name=None)
+            ):
+                columns = [str(value).strip() for value in row]
+                if required_columns.issubset(columns):
+                    df = table.iloc[position + 1:].copy()
+                    df.columns = columns
+                    break
+
+            if df is not None:
+                break
+
+        if df is None:
+            raise ValueError("ไม่พบคอลัมน์ 'หลักทรัพย์' และ 'กลุ่มอุตสาหกรรม'")
+
+        df = df.dropna(subset=["หลักทรัพย์"]).reset_index(drop=True)
+        if df.empty:
+            raise ValueError("ตารางรายชื่อหลักทรัพย์ไม่มีข้อมูล")
+
+    except ValueError as exc:
+        if not content.startswith((bytes.fromhex("d0cf11e0a1b11ae1"), b"PK\x03\x04")):
+            page = lxml_html.fromstring(content) if content.strip() else None
+            title = page.xpath("normalize-space(string(//title))") if page is not None else ""
+            print(f"SET response title: {title or '(ไม่มี)'}", flush=True)
+        raise RuntimeError(f"อ่านไฟล์รายชื่อหลักทรัพย์จาก SET ไม่สำเร็จ: {exc}") from exc
+
+    xls_path.write_bytes(content)
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
-    print("✅ เตรียมไฟล์ตั้งต้นเสร็จสิ้น")
+
+    if data_path.exists():
+        shutil.rmtree(data_path)
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"✅ เตรียมรายชื่อหลักทรัพย์แล้ว {len(df):,} รายการ", flush=True)
     return df
 
 def parse_page_content(html_content, page_url):
