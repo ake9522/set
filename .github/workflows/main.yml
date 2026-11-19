@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install pandas selenium webdriver-manager beautifulsoup4 lxml html5lib requests
+          pip install pandas selenium webdriver-manager beautifulsoup4 lxml html5lib requests xlrd openpyxl
 
       - name: Run SET Scraper
         run: python set_github.py
